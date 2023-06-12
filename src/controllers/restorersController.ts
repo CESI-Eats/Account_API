@@ -97,14 +97,17 @@ export const updateRestorer = async (req: Request, res: Response) => {
 // Delete
 export const deleteRestorer = async (req: Request, res: Response) => {
     try {
-        const restorer = await AppDataSource.manager.findOneBy(Restorer, {id: req.params.id});
-
+        let restorer = await AppDataSource.manager.findOne(Restorer, {where: { id: req.params.id }, relations: ['address']});
         if (!restorer) {
             return res.status(404).json({message: 'Restorer not found'});
         }
 
         const address = restorer.address;
 
+        // Dissocier l'adresse du restorer
+        restorer.address = null;
+
+        await AppDataSource.manager.save(restorer);
         // Supprimer l'adresse associée
         await AppDataSource.manager.remove(Address, address);
 
