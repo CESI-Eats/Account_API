@@ -1,15 +1,16 @@
 ﻿import dotenv from 'dotenv';
 import express from 'express';
-import mongoose from 'mongoose';
-import myModelRoutes from './routes/myModelRoutes';
+import restorersRoutes from './routes/restorersRoutes';
+import { AppDataSource } from './data-source'
 
 dotenv.config();
 const app = express();
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI as string, { useNewUrlParser: true, useUnifiedTopology: true } as any)
-  .then(() => console.log('Successfully connected to MongoDB.'))
-  .catch((error) => console.log('Failed to connect to MongoDB.', error));
+// Connect to pg
+AppDataSource.initialize().then(async () => {
+    console.log("Database successfully connected...")
+}).catch((error: any) => console.log(error))
+
 
 // Set JSON format for HTTP requests
 app.use(express.json());
@@ -18,7 +19,7 @@ const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('../swagger_output.json')
 // Create endpoint
 app.get('/', (req, res) => {res.status(200).json({ response: true });});
-app.use('/myModels', myModelRoutes);
+app.use('/restorers', restorersRoutes);
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 // Start server
