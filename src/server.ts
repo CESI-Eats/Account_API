@@ -1,9 +1,9 @@
 ﻿import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import restorersRoutes from './routes/restorersRoutes';
 import { AppDataSource } from './data-source'
 
-dotenv.config();
 const app = express();
 
 // Connect to pg

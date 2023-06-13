@@ -3,8 +3,6 @@ import { DataSource } from "typeorm";
 import { Restorer } from "./entity/Restorer";
 import { Address } from "./entity/Address";
 
-require('dotenv').config(); // Importer dotenv pour charger les variables d'environnement
-
 export const AppDataSource = new DataSource({
     type: "postgres",
     host: process.env.DB_HOST || "localhost",

@@ -11,4 +11,5 @@ router.post('/', authorize([IdentityType.TECHNICAL, IdentityType.SALES, Identity
 router.put('/:id', authorize([IdentityType.TECHNICAL, IdentityType.SALES, IdentityType.RESTORER]), restorersController.updateRestorer);
 router.delete('/:id', authorize([IdentityType.TECHNICAL, IdentityType.SALES, IdentityType.RESTORER]),  restorersController.deleteRestorer);
 
+router.put("/kitty", authorize([IdentityType.TECHNICAL, IdentityType.SALES, IdentityType.RESTORER]), restorersController.kittyRestorer);
 export default router;
