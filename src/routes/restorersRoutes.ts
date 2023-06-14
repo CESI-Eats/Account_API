@@ -2,6 +2,7 @@
 import * as restorersController from '../controllers/restorersController';
 import {IdentityType} from "../enums/identityType";
 import {authorize} from "../middlewares/authorizationMiddleware";
+import {updateKittyRestorer} from "../controllers/restorersController";
 
 const router = express.Router();
 
@@ -10,5 +11,6 @@ router.get('/:id', authorize([IdentityType.TECHNICAL, IdentityType.SALES, Identi
 router.post('/', authorize([IdentityType.TECHNICAL, IdentityType.SALES, IdentityType.RESTORER]), restorersController.createRestorer);
 router.put('/:id', authorize([IdentityType.TECHNICAL, IdentityType.SALES, IdentityType.RESTORER]), restorersController.updateRestorer);
 router.delete('/:id', authorize([IdentityType.TECHNICAL, IdentityType.SALES, IdentityType.RESTORER]),  restorersController.deleteRestorer);
-
+router.post("/kitty/update", authorize([IdentityType.TECHNICAL, IdentityType.SALES, IdentityType.USER]), restorersController.updateKittyRestorer);
+router.post("/kitty/reset", authorize([IdentityType.TECHNICAL, IdentityType.SALES, IdentityType.RESTORER]), restorersController.resetKittyRestorer);
 export default router;

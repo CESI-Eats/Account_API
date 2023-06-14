@@ -1,6 +1,7 @@
 ﻿import {Entity, PrimaryColumn, Column, OneToOne, JoinColumn} from "typeorm";
 import {Address} from "./Address";
 
+
 @Entity()
 export class Restorer {
 
@@ -12,6 +13,9 @@ export class Restorer {
 
   @Column()
   phoneNumber: string;
+
+  @Column()
+  kitty: Number;
 
   @OneToOne(type => Address)
   @JoinColumn()
