@@ -20,7 +20,7 @@ const swaggerFile = require('../swagger_output.json')
 // Create endpoint
 app.get('/', (req, res) => {res.status(200).json({ response: true });});
 app.use('/restorers', restorersRoutes);
-app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
+app.use('/account-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 // Start server
 const PORT = process.env.PORT || 3000;
