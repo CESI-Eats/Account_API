@@ -45,6 +45,7 @@ export const createRestorer = async (req: Request, res: Response) => {
 
         // Create the new restorer
         restorer = new Restorer();
+        restorer.id = (req as any).identityId;
         restorer.name = req.body.name;
         restorer.phoneNumber = req.body.phoneNumber;
         restorer.kitty = 0;
@@ -131,28 +132,34 @@ export const deleteRestorer = async (req: Request, res: Response) => {
 };
 
 // Update kitty
-export const kittyRestorer = async (req: Request, res: Response) => {
+export const updateKittyRestorer = async (req: Request, res: Response) => {
     try {
-        // Create the new restorer
+        // get restorer
+        const restorer = await AppDataSource.manager.findOne(Restorer, {
+            where: {id: req.body.restorerId},
+            relations: ['address']
+        });
+        restorer.kitty += req.body.amount;
+        const updatedRestorer = await AppDataSource.manager.save(restorer);
+        res.status(200).json(updatedRestorer);
+    } catch (err) {
+        const errMessage = err instanceof Error ? err.message : 'An error occurred';
+        res.status(400).json({message: errMessage});
+    }
+};
+
+export const resetKittyRestorer = async (req: Request, res: Response) => {
+    try {
+        // get restorer
         const restorer = await AppDataSource.manager.findOne(Restorer, {
             where: {id: (req as any).identityId},
             relations: ['address']
         });
-        switch (req.body.type) {
-            case "debit":
-                restorer.kitty = 0;
-                break
-            case "credit":
-                restorer.kitty += req.body.amount;
-                break
-            default:
-                res.status(400).json({message: 'An error occurred'});
-                return
-        }
+        restorer.kitty = 0;
         const updatedRestorer = await AppDataSource.manager.save(restorer);
-
         res.status(200).json(updatedRestorer);
-    } catch (err) {
+    } catch
+        (err) {
         const errMessage = err instanceof Error ? err.message : 'An error occurred';
         res.status(400).json({message: errMessage});
     }
