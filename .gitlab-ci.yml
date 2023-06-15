@@ -1,0 +1,4 @@
+include:
+  - project: 'cesi-fise-info-a4-orleans-22-23_groupe1/projet/templates_ci'
+    ref: master
+    file: 'nodejs_api.gitlab-ci.yml'
