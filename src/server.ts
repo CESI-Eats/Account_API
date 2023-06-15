@@ -3,6 +3,7 @@ dotenv.config();
 import express from 'express';
 import restorersRoutes from './routes/restorersRoutes';
 import { AppDataSource } from './data-source'
+import { listenLapinou } from './services/lapinouService';
 
 const app = express();
 
@@ -21,6 +22,9 @@ const swaggerFile = require('../swagger_output.json')
 app.get('/', (req, res) => {res.status(200).json({ response: true });});
 app.use('/restorers', restorersRoutes);
 app.use('/account-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
+
+// Listen lapinou
+listenLapinou(process.env.LAPINOU_URI as string);
 
 // Start server
 const PORT = process.env.PORT || 3000;
