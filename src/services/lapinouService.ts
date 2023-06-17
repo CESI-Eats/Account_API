@@ -8,7 +8,7 @@ export interface MessageLapinou {
 let conn: amqp.Connection;
 let ch: amqp.Channel;
 
-export async function startConnection(): Promise<void> {
+export async function connectLapinou(): Promise<void> {
     return new Promise((resolve, reject) => {
         amqp.connect(String(process.env.LAPINOU_URI), (err, connection) => {
             if (err) {
@@ -66,7 +66,6 @@ export function receiveOneMessage(queueName: string): Promise<MessageLapinou> {
         ch.assertQueue(queueName, { durable: true });
 
         // Wait for Queue Messages
-        console.log(` [*] Waiting for a message in ${queueName}. To exit press CTRL+C`);
         ch.consume(queueName, (msg) => {
             if (msg !== null) {
                 const message: MessageLapinou = JSON.parse(msg.content.toString());

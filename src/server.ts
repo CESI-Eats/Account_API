@@ -3,8 +3,7 @@ dotenv.config();
 import express from 'express';
 import restorersRoutes from './routes/restorersRoutes';
 import { AppDataSource } from './data-source'
-import { MessageLapinou, receiveManyMessages, sendMessage, startConnection } from './services/lapinouService';
-import { Restorer } from './entity/Restorer';
+import { initLapinou } from './lapinou';
 
 const app = express();
 
@@ -24,14 +23,8 @@ app.get('/', (req, res) => {res.status(200).json({ response: true });});
 app.use('/restorers', restorersRoutes);
 app.use('/account-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
-startConnection().then(() => {
-    receiveManyMessages('reset-restorer-kitty-payment', (message) => {
-        console.log(`Received message: ${JSON.stringify(message)}`);
-        sendMessage(message, 'reset-restorer-kitty-account');
-    });
-}).catch((err) => {
-    console.error('Failed to start server:', err);
-});
+// Initialize lapinou
+initLapinou();
 
 // Start server
 const PORT = process.env.PORT || 3000;
