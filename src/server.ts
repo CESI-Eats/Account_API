@@ -3,7 +3,7 @@ dotenv.config();
 import express from 'express';
 import restorersRoutes from './routes/restorersRoutes';
 import { AppDataSource } from './data-source'
-import { MessageLapinou, receiveMessage, sendMessage } from './services/lapinouService';
+import { MessageLapinou, receiveManyMessages, sendMessage, startConnection } from './services/lapinouService';
 import { Restorer } from './entity/Restorer';
 
 const app = express();
@@ -24,19 +24,14 @@ app.get('/', (req, res) => {res.status(200).json({ response: true });});
 app.use('/restorers', restorersRoutes);
 app.use('/account-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
-// Listen lapinou
-// listenLapinou(process.env.LAPINOU_URI as string);
-
-receiveMessage("reset-restorer-kitty-payment")
-    .then(async (data) => {
-        const restorer = await AppDataSource.manager.findOne(Restorer, {
-            where: {id: String((data as MessageLapinou).content)},
-            relations: ['address']
-        });
-        restorer.kitty = 0;
-        const updatedRestorer = await AppDataSource.manager.save(restorer);
-        await sendMessage({success: true, content: updatedRestorer.kitty}, "reset-restorer-kitty-account")
-    })
+startConnection().then(() => {
+    receiveManyMessages('reset-restorer-kitty-payment', (message) => {
+        console.log(`Received message: ${JSON.stringify(message)}`);
+        sendMessage(message, 'reset-restorer-kitty-account');
+    });
+}).catch((err) => {
+    console.error('Failed to start server:', err);
+});
 
 // Start server
 const PORT = process.env.PORT || 3000;
