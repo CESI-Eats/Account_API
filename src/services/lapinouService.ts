@@ -1,4 +1,5 @@
 import * as amqp from 'amqplib/callback_api';
+import { initLapinou } from '../lapinou';
 
 export interface MessageLapinou {
     success: boolean;
@@ -6,6 +7,7 @@ export interface MessageLapinou {
 }
 
 let conn: amqp.Connection;
+let connected = false;
 let ch: amqp.Channel;
 
 export async function connectLapinou(): Promise<void> {
@@ -17,6 +19,21 @@ export async function connectLapinou(): Promise<void> {
                 return;
             }
             conn = connection;
+            connected = true;
+            console.log('Connected to rabbitMQ');
+            conn.on('close', async () => {
+                console.error('Connection to rabbitMQ closed');
+                connected = false;
+                while (!connected) {
+                    console.log('Attempting to reconnect...');
+                    initLapinou();
+                    if (!connected) {
+                        // Attendre 5 secondes avant la prochaine tentative de reconnexion
+                        await new Promise((resolve) => setTimeout(resolve, 1000));
+                    }
+                }
+            });
+            
 
             // Create channel
             conn.createChannel((err, channel) => {
@@ -33,8 +50,10 @@ export async function connectLapinou(): Promise<void> {
     });
 }
 
-
-export function sendMessage(message: MessageLapinou, queueName: string): void {
+export async function sendMessage(message: MessageLapinou, queueName: string): Promise<void> {
+    if (!connected) {
+        throw new Error('Not connected to rabbitMQ');
+    }
     // Declare the queue
     ch.assertQueue(queueName, { durable: true });
 
@@ -47,6 +66,9 @@ export function sendMessage(message: MessageLapinou, queueName: string): void {
 }
 
 export function receiveManyMessages(queueName: string, callback: (message: MessageLapinou) => void): void {
+    if (!connected) {
+        return;
+    }
     // Declare the queue
     ch.assertQueue(queueName, { durable: true });
 
