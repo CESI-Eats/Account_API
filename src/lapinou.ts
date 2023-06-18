@@ -18,6 +18,21 @@ export function initLapinou(){
                 sendMessage({success: false, content: err} as MessageLapinou, 'reset-restorer-kitty-account');
             }
         });
+        
+        receiveManyMessages('update-restorer-kitty-command', async (message) => {
+            console.log(`Received message: ${JSON.stringify(message)}`);
+            try {
+                const restorer = await AppDataSource.manager.findOne(Restorer, {
+                    where: {id: String((message as MessageLapinou).content.restorerId)},
+                    relations: ['address']
+                });
+                restorer.kitty += (message as MessageLapinou).content.kitty;
+                const updatedRestorer = await AppDataSource.manager.save(restorer);
+                sendMessage({success: true, content: updatedRestorer.kitty} as MessageLapinou, 'update-restorer-kitty-account');
+            }catch(err){
+                sendMessage({success: false, content: err} as MessageLapinou, 'update-restorer-kitty-account');
+            }
+        });
     }).catch((err) => {
         console.error('Failed to connect to rabbitMQ');
     });
