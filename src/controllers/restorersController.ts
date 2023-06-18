@@ -147,20 +147,3 @@ export const updateKittyRestorer = async (req: Request, res: Response) => {
         res.status(400).json({message: errMessage});
     }
 };
-
-export const resetKittyRestorer = async (req: Request, res: Response) => {
-    try {
-        // get restorer
-        const restorer = await AppDataSource.manager.findOne(Restorer, {
-            where: {id: (req as any).identityId},
-            relations: ['address']
-        });
-        restorer.kitty = 0;
-        const updatedRestorer = await AppDataSource.manager.save(restorer);
-        res.status(200).json(updatedRestorer);
-    } catch
-        (err) {
-        const errMessage = err instanceof Error ? err.message : 'An error occurred';
-        res.status(400).json({message: errMessage});
-    }
-};
