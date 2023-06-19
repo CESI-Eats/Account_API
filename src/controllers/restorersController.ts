@@ -130,37 +130,3 @@ export const deleteRestorer = async (req: Request, res: Response) => {
         res.status(500).json({message: errMessage});
     }
 };
-
-// Update kitty
-export const updateKittyRestorer = async (req: Request, res: Response) => {
-    try {
-        // get restorer
-        const restorer = await AppDataSource.manager.findOne(Restorer, {
-            where: {id: req.body.restorerId},
-            relations: ['address']
-        });
-        restorer.kitty += req.body.amount;
-        const updatedRestorer = await AppDataSource.manager.save(restorer);
-        res.status(200).json(updatedRestorer);
-    } catch (err) {
-        const errMessage = err instanceof Error ? err.message : 'An error occurred';
-        res.status(400).json({message: errMessage});
-    }
-};
-
-export const resetKittyRestorer = async (req: Request, res: Response) => {
-    try {
-        // get restorer
-        const restorer = await AppDataSource.manager.findOne(Restorer, {
-            where: {id: (req as any).identityId},
-            relations: ['address']
-        });
-        restorer.kitty = 0;
-        const updatedRestorer = await AppDataSource.manager.save(restorer);
-        res.status(200).json(updatedRestorer);
-    } catch
-        (err) {
-        const errMessage = err instanceof Error ? err.message : 'An error occurred';
-        res.status(400).json({message: errMessage});
-    }
-};
