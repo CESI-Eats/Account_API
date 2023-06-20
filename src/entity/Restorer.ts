@@ -14,8 +14,9 @@ export class Restorer {
   @Column()
   phoneNumber: string;
 
-  @Column()
+  @Column({ nullable: false, type: "float", default: 0.0 })
   kitty: Number;
+
 
   @OneToOne(type => Address)
   @JoinColumn()
