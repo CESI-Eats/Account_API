@@ -68,23 +68,6 @@ export async function sendMessage(message: MessageLapinou, queueName: string): P
     console.log(` [x] Message sent: ${JSON.stringify(message)}`);
 }
 
-export function receiveManyMessages(queueName: string, callback: (message: MessageLapinou) => void): void {
-    if (!connected) {
-        return;
-    }
-    // Declare the queue
-    ch.assertQueue(queueName, { durable: true });
-
-    // Wait for Queue Messages
-    console.log(` [*] Waiting for messages in ${queueName}. To exit press CTRL+C`);
-    ch.consume(queueName, msg => {
-        if (msg !== null) {
-            const message: MessageLapinou = JSON.parse(msg.content.toString());
-            callback(message);
-        }
-    }, { noAck: true });
-}
-
 export function receiveResponses(queueName: string, expectedCorrelationId: string, expectedResponses: number): Promise<MessageLapinou[]> {
     return new Promise((resolve, reject) => {
         // Declare the queue
@@ -141,12 +124,27 @@ export async function publishTopic(exchange: string, routingKey: string, message
     console.log(` [x] Sent ${routingKey}:'${JSON.stringify(message)}'`);
 }
 
-export async function initListenTopic(exchange: string, keys: string[]): Promise<{queue: string}> {
+export async function initExchange(exchange: string): Promise<string> {
     if (!connected) {
         throw new Error('Not connected to rabbitMQ');
     }
-    // Declare the exchange
-    ch.assertExchange(exchange, 'topic', { durable: false });
+    return new Promise((resolve, reject) => {
+        try {
+            // Declare the exchange
+            ch.assertExchange(exchange, 'topic', { durable: false });
+            resolve(exchange);
+        } catch (err) {
+            reject(err);
+        }
+        
+    });
+}
+
+
+export async function initQueue(exchange: string, topic: string): Promise<{queue: string, topic: string}> {
+    if (!connected) {
+        throw new Error('Not connected to rabbitMQ');
+    }
 
     // Declare a new queue
     return new Promise((resolve, reject) => {
@@ -156,16 +154,13 @@ export async function initListenTopic(exchange: string, keys: string[]): Promise
                 reject(err);
                 return;
             }
+            ch.bindQueue(q.queue, exchange, topic);
 
-            // For each key in the provided keys, bind the queue to the exchange
-            keys.forEach((key) => {
-                ch.bindQueue(q.queue, exchange, key);
-            });
-
-            resolve(q);
+            resolve({queue: q.queue, topic: topic});
         });
     });
 }
+
 
 export function handleTopic(queue: string, key: string, callback: (msg: MessageLapinou) => void): void {
     if (!connected) {
