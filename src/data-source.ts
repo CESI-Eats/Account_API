@@ -1,7 +1,9 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { Restorer } from "./entity/Restorer";
 import { Address } from "./entity/Address";
+import { User } from "./entity/User";
+import { Restorer } from "./entity/Restorer";
+import { Deliveryman } from "./entity/Deliveryman";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -12,7 +14,7 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME || "account_dev",
     synchronize: true,
     logging: false,
-    entities: [Address, Restorer],
+    entities: [Address, User, Restorer, Deliveryman],
     migrations: [],
     subscribers: [],
 });
