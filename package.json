@@ -4,6 +4,7 @@
     "description": "Account manager (user, restorer and deliveryman) for CESI Eats.",
     "type": "commonjs",
     "devDependencies": {
+        "@types/amqplib": "^0.10.1",
         "@types/jsonwebtoken": "^9.0.2",
         "@types/node": "^16.11.10",
         "ts-node": "10.7.0",
