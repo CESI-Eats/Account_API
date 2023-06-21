@@ -4,7 +4,7 @@ import {Address} from "../entity/Address";
 import {MessageLapinou, handleTopic, initExchange, initQueue, sendMessage} from "../services/lapinouService";
 
 export function createDeliveryManExchange() {
-    initExchange('deliveryman').then(exchange => {
+    initExchange('deliverymans').then(exchange => {
         initQueue(exchange, 'get.deliverymans.accounts').then(({queue, topic}) => {
             handleTopic(queue, topic, async (msg) => {
                 const message = msg.content as MessageLapinou;
