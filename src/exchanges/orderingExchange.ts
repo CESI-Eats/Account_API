@@ -45,5 +45,29 @@ export function createOrderingExchange() {
                 }
             });
         });
+        initQueue(exchange, 'order.delivered').then(({queue, topic}) => {
+            handleTopic(queue, topic, async (msg) => {
+                const message = msg.content as MessageLapinou;
+                try {
+                console.log(` [x] Received message: ${JSON.stringify(message)}`);
+
+                let deliveryman = await AppDataSource.manager.findOne(Deliveryman, {
+                    where: {id: message.content._idDeliveryMan},
+                    relations: ['address']
+                });
+                if (deliveryman == null) {
+                    throw new Error('Cannot find deliveryman');
+                }
+                deliveryman.kitty += message.content.deliveryAmount;
+                deliveryman.available = true;
+                await AppDataSource.manager.save(deliveryman);
+                console.log(`Deliveryman ${deliveryman.id} kitty updated to ${deliveryman.kitty}`);
+
+                } catch (err) {
+                    const errMessage = err instanceof Error ? err.message : 'An error occurred';
+                    console.error(errMessage);
+                }
+            });
+        });
     });
 }
