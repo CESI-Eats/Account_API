@@ -24,6 +24,7 @@ export function createOrderingExchange() {
 
                 let availableDeliveryMan: Deliveryman;
                 while (availableDeliveryMan == null) {
+                    console.log('Looking for an available deliveryman...')
                     availableDeliveryMan = await AppDataSource.manager.findOne(Deliveryman, {
                         where: {available: true}
                     });
@@ -34,7 +35,7 @@ export function createOrderingExchange() {
 
                 const orderMessage: MessageLapinou = {
                     success: true,
-                    content: {deliveryMan: availableDeliveryMan, _idUser: message.content._idUser}
+                    content: {deliveryMan: availableDeliveryMan, _idUser: message.content._idUser, _idOrder: message.content._id}
                 };
                 await publishTopic('ordering', 'assigned.deliveryman.order', orderMessage);
 
