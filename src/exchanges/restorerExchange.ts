@@ -46,7 +46,6 @@ export function createRestorerExchange(){
                 }
             });
         });
-
         initQueue(exchange, 'create.restorer.account').then(({queue, topic}) => {
             handleTopic(queue, topic, async (msg) => {
                 const message = msg.content as MessageLapinou;
