@@ -158,6 +158,29 @@ export function createDeliveryManExchange() {
                     }
                 });
             });
+            initQueue(exchange, 'collect.deliveryman.kitty').then(({queue, topic}) => {
+                handleTopic(queue, topic, async (msg) => {
+                    const message = msg.content as MessageLapinou;
+                    try {
+                        console.log(` [x] Received message: ${JSON.stringify(message)}`);
+                        // Check if the user already exists
+                        let deliveryman = await AppDataSource.manager.findOne(Deliveryman, {
+                            where: {id: message.content.id},
+                            relations: ['address']
+                        });
+                
+                        if (deliveryman == null) {
+                            throw new Error('Cannot find restorer');
+                        }
+                        deliveryman.kitty = 0;
+                        await AppDataSource.manager.save(deliveryman);
+                        await sendMessage({success: true, content: {kitty: deliveryman.kitty}, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
+                    } catch (err) {
+                        const errMessage = err instanceof Error ? err.message : 'An error occurred';
+                        await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
+                    }
+                });
+            });
         });
     });
 }
