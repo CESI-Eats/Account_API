@@ -7,7 +7,7 @@ import { initLapinou } from './lapinou';
 // Connect to pg
 AppDataSource.initialize().then(async () => {
     console.log("Database successfully connected...")
-})
+}).catch((error) => console.log('Failed to connect to MongoDB.', error));
 
 // Initialize lapinou
 initLapinou();
