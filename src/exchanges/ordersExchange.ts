@@ -4,6 +4,7 @@ import {Address} from "../entity/Address";
 import {MessageLapinou, handleTopic, initExchange, initQueue, sendMessage} from "../services/lapinouService";
 import {In} from "typeorm";
 import {Restorer} from "../entity/Restorer";
+import {throws} from "assert";
 
 export function createOrdersExchange() {
     initExchange('orders').then(exchange => {
@@ -18,13 +19,13 @@ export function createOrdersExchange() {
 
                         // Retrieve users
                         const users = await AppDataSource.manager.find(User, {
-                            where: { id: In(userIds) },
+                            where: {id: In(userIds)},
                             relations: ['address']
                         });
 
                         // Retrieve restorers
                         const restorers = await AppDataSource.manager.find(Restorer, {
-                            where: { id: In(restorerIds) },
+                            where: {id: In(restorerIds)},
                             relations: ['address']
                         });
 
@@ -34,17 +35,22 @@ export function createOrdersExchange() {
                                 users: users,
                                 restorers: restorers
                             },
-                            correlationId: message.correlationId
+                            correlationId: message.correlationId,
+                            sender: 'account'
                         }, message.replyTo);
                     } else {
-                        await sendMessage({ success: false, content: 'Invalid topic', correlationId: message.correlationId }, message.replyTo);
+                            throw new Error('Invalid topic');
                     }
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
-                    await sendMessage({ success: false, content: errMessage, correlationId: message.correlationId, sender: 'account' }, message.replyTo);
+                    await sendMessage({
+                        success: false,
+                        content: errMessage,
+                        correlationId: message.correlationId,
+                        sender: 'account'
+                    }, message.replyTo);
                 }
             });
-
         });
     });
 }

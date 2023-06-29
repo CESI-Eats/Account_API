@@ -14,10 +14,10 @@ export function createUserExchange() {
                     let users = await AppDataSource.manager.find(User, {relations: ['address']});
 
                     if (users == null) {
-                        await sendMessage({success: false, content: 'Cannot find user', correlationId: message.correlationId}, message.replyTo);
+                        await sendMessage({success: false, content: 'Cannot find user', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                         return;
                     }
-                    await sendMessage({success: true, content: users, correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: users, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -37,10 +37,10 @@ export function createUserExchange() {
                     });
 
                     if (user == null) {
-                        await sendMessage({success: false, content: 'Cannot find user', correlationId: message.correlationId}, message.replyTo);
+                        await sendMessage({success: false, content: 'Cannot find user', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                         return;
                     }
-                    await sendMessage({success: true, content: user, correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: user, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -56,7 +56,7 @@ export function createUserExchange() {
                     // Check if the user already exists
                     let user = await AppDataSource.manager.findOneBy(User, {id: message.content.id});
                     if (user) {
-                        await sendMessage({success: false, content: 'User already exist', correlationId: message.correlationId}, message.replyTo);
+                        await sendMessage({success: false, content: 'User already exist', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                         return;
                     }
 
@@ -82,7 +82,7 @@ export function createUserExchange() {
                     // Save the new user
                     await AppDataSource.manager.save(user);
 
-                    await sendMessage({success: true, content: 'Account created', correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: 'Account created', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -112,7 +112,7 @@ export function createUserExchange() {
                         await AppDataSource.manager.save(address);
                         await AppDataSource.manager.save(user);
 
-                        await sendMessage({success: true, content: 'Account updated', correlationId: message.correlationId}, message.replyTo);
+                        await sendMessage({success: true, content: 'Account updated', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                     } catch (err) {
                         const errMessage = err instanceof Error ? err.message : 'An error occurred';
                         await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -130,7 +130,7 @@ export function createUserExchange() {
                             relations: ['address']
                         });
                         if (!user) {
-                            await sendMessage({success: false, content: 'Cannot find user', correlationId: message.correlationId}, message.replyTo);
+                            await sendMessage({success: false, content: 'Cannot find user', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                             return;
                         }
 
@@ -146,7 +146,7 @@ export function createUserExchange() {
                         // Supprimer le user
                         await AppDataSource.manager.remove(User, user);
 
-                        await sendMessage({success: true, content: 'Account deleted', correlationId: message.correlationId}, message.replyTo);
+                        await sendMessage({success: true, content: 'Account deleted', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                     } catch (err) {
                         const errMessage = err instanceof Error ? err.message : 'An error occurred';
                         await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
