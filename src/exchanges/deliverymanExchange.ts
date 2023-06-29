@@ -1,7 +1,8 @@
 import {AppDataSource} from "../data-source";
 import {Deliveryman} from "../entity/Deliveryman";
 import {Address} from "../entity/Address";
-import {MessageLapinou, handleTopic, initExchange, initQueue, sendMessage} from "../services/lapinouService";
+import {MessageLapinou, handleTopic, initExchange, initQueue, publishTopic, receiveResponses, sendMessage} from "../services/lapinouService";
+import {v4 as uuidv4} from 'uuid';
 
 export function createDeliveryManExchange() {
     initExchange('deliverymans').then(exchange => {
@@ -218,8 +219,23 @@ export function createDeliveryManExchange() {
                     });
 
                     if (deliveryman == null) {
-                        throw new Error('Cannot find restorer');
+                        throw new Error('Cannot find deliveryman');
                     }
+
+                    const replyQueue = 'pay.deliveryman.kitty.reply';
+                    const correlationId = uuidv4();
+                    const paymentMessage: MessageLapinou = {
+                        success: true,
+                        content: {id: message.content.id, amount: deliveryman.kitty, mode: message.content.mode},
+                        correlationId: correlationId,
+                        replyTo: replyQueue
+                    };
+                    await publishTopic('deliverymans', 'pay.deliveryman.kitty', paymentMessage);
+                    const responses = await receiveResponses(replyQueue, correlationId, 1);
+                    if (responses.length === 0 || !responses[0].success) {
+                        throw new Error(responses.length === 0 ? 'No response received' : responses[0].content);
+                    }
+
                     deliveryman.kitty = 0;
                     await AppDataSource.manager.save(deliveryman);
                     await sendMessage({
