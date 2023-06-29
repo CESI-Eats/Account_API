@@ -14,10 +14,9 @@ export function createRestorerExchange(){
                     let restorers = await AppDataSource.manager.find(Restorer, {relations: ['address']});
 
                     if (restorers == null) {
-                        await sendMessage({success: false, content: 'Cannot find restorer', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error('Cannot find restorers');
                     }
-                    await sendMessage({success: true, content: restorers, correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: restorers, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -36,10 +35,9 @@ export function createRestorerExchange(){
                     });
 
                     if (restorer == null) {
-                        await sendMessage({success: false, content: 'Cannot find restorer', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error('Cannot find restorer');
                     }
-                    await sendMessage({success: true, content: restorer, correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: restorer, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -54,8 +52,7 @@ export function createRestorerExchange(){
                     // Check if the user already exists
                     let restorer = await AppDataSource.manager.findOneBy(Restorer, {id: message.content.id});
                     if (restorer) {
-                        await sendMessage({success: false, content: 'Restorer already exist', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error('Restorer already exist');
                     }
 
                     // Create the new restorer
@@ -79,7 +76,7 @@ export function createRestorerExchange(){
                     // Save the new restorer
                     const newRestorer = await AppDataSource.manager.save(restorer);
 
-                    await sendMessage({success: true, content: 'Account created', correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: 'Account created', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -109,7 +106,7 @@ export function createRestorerExchange(){
                     await AppDataSource.manager.save(address);
                     await AppDataSource.manager.save(restorer);
 
-                    await sendMessage({success: true, content: 'Account updated', correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: 'Account updated', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -128,8 +125,7 @@ export function createRestorerExchange(){
                         relations: ['address']
                     });
                     if (!restorer) {
-                        await sendMessage({success: false, content: 'Cannot find restorer', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error('Cannot find restorer');
                     }
 
                     const address = restorer.address;
@@ -144,7 +140,7 @@ export function createRestorerExchange(){
                     // Supprimer le restorer
                     await AppDataSource.manager.remove(Restorer, restorer);
 
-                    await sendMessage({success: true, content: 'Account deleted', correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: 'Account deleted', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
