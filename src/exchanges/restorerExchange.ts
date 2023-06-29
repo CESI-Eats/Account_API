@@ -1,7 +1,8 @@
 import { AppDataSource } from "../data-source";
 import { Restorer } from "../entity/Restorer";
 import { Address } from "../entity/Address";
-import { MessageLapinou, handleTopic, initExchange, initQueue, sendMessage } from "../services/lapinouService";
+import { MessageLapinou, handleTopic, initExchange, initQueue, publishTopic, receiveResponses, sendMessage } from "../services/lapinouService";
+import { v4 as uuidv4 } from 'uuid';
 
 export function createRestorerExchange(){
     initExchange('restorers').then(exchange => {
@@ -162,6 +163,21 @@ export function createRestorerExchange(){
                     if (restorer == null) {
                         throw new Error('Cannot find restorer');
                     }
+                    
+                    const replyQueue = 'pay.restorer.kitty.reply';
+                    const correlationId = uuidv4();
+                    const paymentMessage: MessageLapinou = {
+                        success: true,
+                        content: {id: message.content.id, amount: restorer.kitty, mode: message.content.mode},
+                        correlationId: correlationId,
+                        replyTo: replyQueue
+                    };
+                    await publishTopic('restorers', 'pay.restorer.kitty', paymentMessage);
+                    const responses = await receiveResponses(replyQueue, correlationId, 1);
+                    if (responses.length === 0 || !responses[0].success) {
+                        throw new Error(responses.length === 0 ? 'No response received' : responses[0].content);
+                    }
+
                     restorer.kitty = 0;
                     await AppDataSource.manager.save(restorer);
                     await sendMessage({success: true, content: {kitty: restorer.kitty}, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
