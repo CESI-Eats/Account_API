@@ -16,8 +16,7 @@ export function createHistoricExchange() {
                         relations: ['address']
                     });
                     if (restorer == null) {
-                        await sendMessage({success: false, content: 'Cannot find restorer', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error('Cannot find restorer');
                     }
 
                     // Get user
@@ -26,11 +25,34 @@ export function createHistoricExchange() {
                         relations: ['address']
                     });
                     if (user == null) {
-                        await sendMessage({success: false, content: 'Cannot find user', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error('Cannot find user');
                     }
 
-                    await sendMessage({success: true, content: {restorer: restorer, user: user}, correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: {restorer: restorer, user: user}, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
+                } catch (err) {
+                    const errMessage = err instanceof Error ? err.message : 'An error occurred';
+                    await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
+                }
+            });
+        });
+        initQueue(exchange, 'get.users.restorers.and.catalogs').then(({queue, topic}) => {
+            handleTopic(queue, topic, async (msg) => {
+                const message = msg.content as MessageLapinou;
+                try {
+                    console.log(` [x] Received message: ${JSON.stringify(message)}`);
+                    // Get restorer
+                    let restorer = await AppDataSource.manager.findOne(Restorer, {
+                        where: {id: message.content.restorerId},
+                        relations: ['address']
+                    });
+
+                    // Get user
+                    let user = await AppDataSource.manager.findOne(User, {
+                        where: {id: message.content.userId},
+                        relations: ['address']
+                    });
+
+                    await sendMessage({success: true, content: {restorer: restorer, user: user}, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);

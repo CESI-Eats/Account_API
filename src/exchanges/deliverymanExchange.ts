@@ -14,10 +14,9 @@ export function createDeliveryManExchange() {
                     let deliverymans = await AppDataSource.manager.find(Deliveryman, {relations: ['address']});
 
                     if (deliverymans == null) {
-                        await sendMessage({success: false, content: 'Cannot find deliveryman', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error("Cannot find deliverymans");
                     }
-                    await sendMessage({success: true, content: deliverymans, correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: deliverymans, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -37,10 +36,9 @@ export function createDeliveryManExchange() {
                     });
 
                     if (deliveryman == null) {
-                        await sendMessage({success: false, content: 'Cannot find deliveryman', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error("Cannot find deliveryman");
                     }
-                    await sendMessage({success: true, content: deliveryman, correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: deliveryman, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -56,8 +54,7 @@ export function createDeliveryManExchange() {
                     // Check if the user already exists
                     let deliveryman = await AppDataSource.manager.findOneBy(Deliveryman, {id: message.content.id});
                     if (deliveryman) {
-                        await sendMessage({success: false, content: 'Deliveryman already exist', correlationId: message.correlationId}, message.replyTo);
-                        return;
+                        throw new Error("Deliveryman already exist");
                     }
 
                     // Create the new user
@@ -84,7 +81,7 @@ export function createDeliveryManExchange() {
                     // Save the new user
                     await AppDataSource.manager.save(deliveryman);
 
-                    await sendMessage({success: true, content: 'Deliveryman created', correlationId: message.correlationId}, message.replyTo);
+                    await sendMessage({success: true, content: 'Deliveryman created', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                 } catch (err) {
                     const errMessage = err instanceof Error ? err.message : 'An error occurred';
                     await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -117,7 +114,7 @@ export function createDeliveryManExchange() {
                         await AppDataSource.manager.save(address);
                         await AppDataSource.manager.save(deliveryman);
 
-                        await sendMessage({success: true, content: 'Deliveryman updated', correlationId: message.correlationId}, message.replyTo);
+                        await sendMessage({success: true, content: 'Deliveryman updated', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                     } catch (err) {
                         const errMessage = err instanceof Error ? err.message : 'An error occurred';
                         await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
@@ -135,8 +132,7 @@ export function createDeliveryManExchange() {
                             relations: ['address']
                         });
                         if (!deliveryman) {
-                            await sendMessage({success: false, content: 'Cannot find deliveryman', correlationId: message.correlationId}, message.replyTo);
-                            return;
+                            throw new Error("Cannot find deliveryman");
                         }
 
                         const address = deliveryman.address;
@@ -151,7 +147,7 @@ export function createDeliveryManExchange() {
                         // Supprimer le user
                         await AppDataSource.manager.remove(Deliveryman, deliveryman);
 
-                        await sendMessage({success: true, content: 'Account deleted', correlationId: message.correlationId}, message.replyTo);
+                        await sendMessage({success: true, content: 'Account deleted', correlationId: message.correlationId, sender: 'account'}, message.replyTo);
                     } catch (err) {
                         const errMessage = err instanceof Error ? err.message : 'An error occurred';
                         await sendMessage({success: false, content: errMessage, correlationId: message.correlationId, sender: 'account'}, message.replyTo);
